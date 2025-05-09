@@ -44,7 +44,7 @@ namespace ose4g
          * 
          * @returns boolean telling if add was successful or not.
          */
-        bool add(const Command &command, std::function<void(Args)> processor, const std::string &description = "");
+        void add(const Command &command, std::function<void(Args)> processor, const std::string &description = "");
 
         /**
          * @brief starts the command processor process

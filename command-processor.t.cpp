@@ -11,7 +11,7 @@ INSTANTIATE_TEST_SUITE_P(TestSuite,
 
 TEST_P(AddCommandFailTest, addShouldFailIfCommandIsInvalid) {
     ose4g::CommandProcessor cp("name");
-    EXPECT_FALSE(cp.add(GetParam(), [](ose4g::Args){}, "my description"));
+    EXPECT_THROW(cp.add(GetParam(), [](ose4g::Args){}, "my description"), std::invalid_argument);
 }
 
 class AddCommandPassTest : public testing::TestWithParam<ose4g::Command>{};
@@ -20,7 +20,7 @@ INSTANTIATE_TEST_SUITE_P(TestSuite,
     testing::Values( "send-command", "sendcommand"));
 TEST_P(AddCommandPassTest, addShouldAddCommandSuccessfully) {
     ose4g::CommandProcessor cp("name");
-    EXPECT_TRUE(cp.add(GetParam(), [](ose4g::Args){}, "my description"));
+    EXPECT_NO_THROW(cp.add(GetParam(), [](ose4g::Args){}, "my description"));
 }
 
 class ProcessCommandTest : public testing::Test {
@@ -33,7 +33,7 @@ class ProcessCommandTest : public testing::Test {
 TEST_F(ProcessCommandTest, processShouldCallAddedFunction) {
     ose4g::CommandProcessor cp("name");
     auto f = std::bind(&ProcessCommandTest::doStuff, this, std::placeholders::_1);
-    EXPECT_TRUE(cp.add("mycommand", f, ""));
+    EXPECT_NO_THROW(cp.add("mycommand", f, ""));
     EXPECT_TRUE(cp.process("mycommand", {}));
     EXPECT_TRUE(called);
 }
@@ -131,7 +131,7 @@ class TestCout : public testing::Test{
 
 TEST_F(TestCout, ShouldPrintsOnlyHelpByDefault){
     ose4g::CommandProcessor cp("name");
-    auto helpMessage = "help: lists all commands and their description\n";
+    auto helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";
     cp.help();
     EXPECT_EQ(buffer.str(), helpMessage);
     
@@ -139,9 +139,9 @@ TEST_F(TestCout, ShouldPrintsOnlyHelpByDefault){
 
 TEST_F(TestCout, ShouldPrintDescriptionFromAllOtherCommands){
     ose4g::CommandProcessor cp("name");
-    EXPECT_TRUE(cp.add("send", [](ose4g::Args args){}, "Usage send name args. Sends arg info"));
-    EXPECT_TRUE(cp.add("list", [](ose4g::Args args){}, "lists all active processes"));
-    auto helpMessage = "help: lists all commands and their description\nlist: lists all active processes\nsend: Usage send name args. Sends arg info\n";
+    EXPECT_NO_THROW(cp.add("send", [](ose4g::Args args){}, "Usage send name args. Sends arg info"));
+    EXPECT_NO_THROW(cp.add("list", [](ose4g::Args args){}, "lists all active processes"));
+    auto helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n\t\033[1;34mlist\033[0m: lists all active processes\n\t\033[1;34msend\033[0m: Usage send name args. Sends arg info\n";
     cp.help();
     EXPECT_EQ(buffer.str(), helpMessage);
     
