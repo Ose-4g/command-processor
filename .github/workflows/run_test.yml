@@ -1,6 +1,6 @@
 name: Unit test CI
 run-name: ${{ github.actor }} is testing c++ code 🚀
-on: ["push", "pull_request"]
+on: [ "pull_request"]
 
 jobs:
   build:
