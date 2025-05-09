@@ -143,7 +143,9 @@ public:
 TEST_F(TestCout, ShouldPrintsOnlyHelpByDefault)
 {
     ose4g::CommandProcessor cp("name");
-    auto helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";
+    std::string helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";
+    helpMessage += "\t\033[1;34mclear\033[0m: clear screen\n";
+    helpMessage+= "\t\033[1;34mexit\033[0m: exit program\n";
     cp.help();
     EXPECT_EQ(buffer.str(), helpMessage);
 }
@@ -153,7 +155,11 @@ TEST_F(TestCout, ShouldPrintDescriptionFromAllOtherCommands)
     ose4g::CommandProcessor cp("name");
     EXPECT_NO_THROW(cp.add("send", [](ose4g::Args args) {}, "Usage send name args. Sends arg info"));
     EXPECT_NO_THROW(cp.add("list", [](ose4g::Args args) {}, "lists all active processes"));
-    auto helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n\t\033[1;34mlist\033[0m: lists all active processes\n\t\033[1;34msend\033[0m: Usage send name args. Sends arg info\n";
+    std::string helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";
+    helpMessage += "\t\033[1;34mclear\033[0m: clear screen\n";
+    helpMessage += "\t\033[1;34mexit\033[0m: exit program\n";
+    helpMessage += "\t\033[1;34mlist\033[0m: lists all active processes\n";
+    helpMessage += "\t\033[1;34msend\033[0m: Usage send name args. Sends arg info\n";
     cp.help();
     EXPECT_EQ(buffer.str(), helpMessage);
 }

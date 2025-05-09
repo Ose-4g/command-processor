@@ -12,6 +12,8 @@ namespace ose4g
     void CommandProcessor::help()
     {
         std::string helpMessage = "\t" + addColor("help", Color::BLUE) + ": lists all commands and their description";
+        helpMessage += "\n\t" + addColor("clear", Color::BLUE) + ": clear screen";
+        helpMessage += "\n\t" + addColor("exit", Color::BLUE) + ": exit program";
         for (auto &command : d_commandDescriptionMap)
         {
             helpMessage += ("\n\t" + addColor(command.first, Color::BLUE) + ": " + command.second);
