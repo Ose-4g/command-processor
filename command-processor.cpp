@@ -1,13 +1,23 @@
 #include "command-processor.h"
 #include <iostream>
 #include <format>
+#include <regex>
 
 namespace ose4g{ 
     CommandProcessor::CommandProcessor(const std::string &name):d_name(name){}
 
     void CommandProcessor::help(){}
     bool CommandProcessor::add(const Command &command, std::function<void(Args)> processor, const std::string &description){
-        return false;
+        // starts with alphabet. 
+        // has alphanumeric characters or -
+        std::regex commandPattern("^[A-Za-z][A-Za-z0-9-]*$"); 
+        if(!std::regex_match(command, commandPattern))
+        {
+            return false;
+        }
+        d_commandProcessorMap[command] = processor;
+        d_commandDescriptionMap[command] = description;
+        return true;
     }
 
     void CommandProcessor::run(){
@@ -62,10 +72,17 @@ namespace ose4g{
         {
             seen.push_back(temp);
         }
+        command = seen[0];
+        args = std::vector(seen.begin()+1, seen.end());
         return true;
     }
     bool CommandProcessor::process(const Command &command, Args args){
-        return false;
+        if(d_commandProcessorMap.find(command) == d_commandProcessorMap.end())
+        {
+            return false;
+        }
+        d_commandProcessorMap[command](args);
+        return true;
     }
 
     void CommandProcessor::clearScreen(){

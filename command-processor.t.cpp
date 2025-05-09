@@ -4,12 +4,47 @@
 
 
 
-TEST(CommandProcessorTest, processShouldCallAddedFunction) {
+class AddCommandFailTest : public testing::TestWithParam<ose4g::Command>{};
+INSTANTIATE_TEST_SUITE_P(TestSuite,
+    AddCommandFailTest,
+    testing::Values( "2sendcommand", "*sendcommand", "send*command2", "send command2"));
+
+TEST_P(AddCommandFailTest, addShouldFailIfCommandIsInvalid) {
     ose4g::CommandProcessor cp("name");
+    EXPECT_FALSE(cp.add(GetParam(), [](ose4g::Args){}, "my description"));
 }
-TEST(CommandProcessorTest, processShouldFailIfFunctionNotAdded) {}
-TEST(CommandProcessorTest, addShouldFailIfCommandIsInvalid) {}
-TEST(CommandProcessorTest, addShouldAddCommandSuccessfully) {}
+
+class AddCommandPassTest : public testing::TestWithParam<ose4g::Command>{};
+INSTANTIATE_TEST_SUITE_P(TestSuite,
+    AddCommandPassTest,
+    testing::Values( "send-command", "sendcommand"));
+TEST_P(AddCommandPassTest, addShouldAddCommandSuccessfully) {
+    ose4g::CommandProcessor cp("name");
+    EXPECT_TRUE(cp.add(GetParam(), [](ose4g::Args){}, "my description"));
+}
+
+class ProcessCommandTest : public testing::Test {
+    public:
+        bool called = false;
+        void doStuff(ose4g::Args args){
+            called = true;
+        }
+}; 
+TEST_F(ProcessCommandTest, processShouldCallAddedFunction) {
+    ose4g::CommandProcessor cp("name");
+    auto f = std::bind(&ProcessCommandTest::doStuff, this, std::placeholders::_1);
+    EXPECT_TRUE(cp.add("mycommand", f, ""));
+    EXPECT_TRUE(cp.process("mycommand", {}));
+    EXPECT_TRUE(called);
+}
+
+TEST(CommandProcessorTest, processShouldFailIfFunctionNotAdded) {
+    ose4g::CommandProcessor cp("name");
+    EXPECT_FALSE(cp.process("mycommand", {}));
+}
+
+
+
 
 struct ParseTestInfo{
     std::string d_input;
@@ -31,6 +66,8 @@ TEST_P(ParseStatementPassTest, parseStatementShouldPassForValidStatment) {
     ose4g::Command command;
     ose4g::Args args;
     EXPECT_TRUE(cp.parseStatement(value.d_input, command, args));
+    EXPECT_EQ(command, value.d_command);
+    EXPECT_EQ(args, value.d_args);
 }
 
 TEST_P(ParseStatementFailTest, parseStatementShouldFailForInvalidStatements) {
