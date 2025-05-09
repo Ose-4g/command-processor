@@ -5,7 +5,7 @@ cd build && make
 
 if [[ $# > 0 && "$1" == "t" ]]
 then 
-   ctest
+   ./commandprocessortest --gtest_catch_exceptions=0
 else
     ./commandprocessor
 fi

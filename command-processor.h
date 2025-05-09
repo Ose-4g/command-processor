@@ -17,6 +17,9 @@ namespace ose4g
         std::unordered_map<Command, std::function<void(Args)>> d_commandProcessorMap;
         std::unordered_map<Command, std::string> d_commandDescriptionMap;
         std::string d_name;
+        bool isRunning  = true;
+        void clearScreen();
+
 
     public:
         /**
