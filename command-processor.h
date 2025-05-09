@@ -3,6 +3,7 @@
 
 
 #include <unordered_map>
+#include <map>
 #include <functional>
 #include <string>
 
@@ -15,7 +16,7 @@ namespace ose4g
     {
     private:
         std::unordered_map<Command, std::function<void(Args)>> d_commandProcessorMap;
-        std::unordered_map<Command, std::string> d_commandDescriptionMap;
+        std::map<Command, std::string> d_commandDescriptionMap;
         std::string d_name;
         bool isRunning  = true;
         void clearScreen();

@@ -113,3 +113,36 @@ INSTANTIATE_TEST_SUITE_P(TestSuite,
                                  "send 'hello world'",
                                  "send",
                                  std::vector<std::string>{"hello world"}}));
+
+class TestCout : public testing::Test{
+    public:
+        std::stringstream buffer;
+        std::streambuf *sbuf;
+        void SetUp() override{
+            buffer.clear();
+            sbuf = std::cout.rdbuf();
+            std::cout.rdbuf(buffer.rdbuf());
+        }
+
+        void TearDown() override {
+            std::cout.rdbuf(sbuf);
+        }
+};
+
+TEST_F(TestCout, ShouldPrintsOnlyHelpByDefault){
+    ose4g::CommandProcessor cp("name");
+    auto helpMessage = "help: lists all commands and their description\n";
+    cp.help();
+    EXPECT_EQ(buffer.str(), helpMessage);
+    
+}
+
+TEST_F(TestCout, ShouldPrintDescriptionFromAllOtherCommands){
+    ose4g::CommandProcessor cp("name");
+    EXPECT_TRUE(cp.add("send", [](ose4g::Args args){}, "Usage send name args. Sends arg info"));
+    EXPECT_TRUE(cp.add("list", [](ose4g::Args args){}, "lists all active processes"));
+    auto helpMessage = "help: lists all commands and their description\nlist: lists all active processes\nsend: Usage send name args. Sends arg info\n";
+    cp.help();
+    EXPECT_EQ(buffer.str(), helpMessage);
+    
+}

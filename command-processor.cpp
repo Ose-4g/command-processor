@@ -6,7 +6,14 @@
 namespace ose4g{ 
     CommandProcessor::CommandProcessor(const std::string &name):d_name(name){}
 
-    void CommandProcessor::help(){}
+    void CommandProcessor::help(){
+        std::string helpMessage = "help: lists all commands and their description";
+        for(auto &command: d_commandDescriptionMap)
+        {
+            helpMessage+=("\n"+command.first+": "+command.second);
+        }
+        std::cout<<helpMessage<<std::endl;
+    }
     bool CommandProcessor::add(const Command &command, std::function<void(Args)> processor, const std::string &description){
         // starts with alphabet. 
         // has alphanumeric characters or -
