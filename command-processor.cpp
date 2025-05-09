@@ -37,7 +37,6 @@ namespace ose4g
         std::string input;
         while (isRunning)
         {
-            // std::cout<<"\033[1;32m"<<d_name<<"=> "<<"\033[0m";
             std::cout << "\n"
                       << addColor(d_name + "=> ", Color::GREEN);
             std::getline(std::cin, input);
