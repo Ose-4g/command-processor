@@ -15,6 +15,7 @@ foreach(FILE ${ALL_CPP_FILES})
 endforeach()
 
 add_library(commandprocessor STATIC ${CPP_FILES})
+target_include_directories(commandprocessor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(FetchContent)
 FetchContent_Declare(
