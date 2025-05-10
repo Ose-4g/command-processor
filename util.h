@@ -1,3 +1,6 @@
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <string>
 
 namespace ose4g
@@ -11,3 +14,5 @@ namespace ose4g
     };
     std::string addColor(const std::string &value, Color color);
 }
+
+#endif
