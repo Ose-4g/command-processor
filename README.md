@@ -9,16 +9,22 @@ This was built and tested with UNIX terminal. So windows default terminal (comma
 
 ## How to use in your projects
 - Clone this repository to your project folder
-- If using cmake, add this repsitory using `add_subdirectory` in your `CMakeLists.txt` file
+- If using cmake, add the following to your `CMakeLists.txt` file
+```
+include(FetchContent)
+
+FetchContent_Declare(
+  commandprocessor
+  GIT_REPOSITORY https://github.com/Ose-4g/command-processor.git
+  GIT_TAG v1.1.1
+)
+
+FetchContent_MakeAvailable(commandprocessor)
+add_executable(YOUR_APP_EXECUTABLE_NAME ${CPP_FILES})
+target_link_libraries(YOUR_APP_EXECUTABLE_NAME commandprocessor)
+```
 - include `command-processor.h` and get access to all the functions. 
 
-## Building this project. 
-If you're building this project as a standalone project. 
-- run 
-```bash
-./run.sh
-```
-in your terminal
 
 ## Testing
 To run the unit tests in this project. Run 
