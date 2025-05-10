@@ -14,7 +14,7 @@ foreach(FILE ${ALL_CPP_FILES})
     endif()
 endforeach()
 
-add_executable(commandprocessor ${CPP_FILES})
+add_library(commandprocessor STATIC ${CPP_FILES})
 
 include(FetchContent)
 FetchContent_Declare(
