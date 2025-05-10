@@ -81,6 +81,7 @@ namespace ose4g
         int n = input.size();
         while (i < n)
         {
+            // if string is within quotes, find the end quote.
             if (input[i] == '"' || input[i] == '\'')
             {
                 int start = i;
@@ -119,6 +120,7 @@ namespace ose4g
         args = std::vector(seen.begin() + 1, seen.end());
         return true;
     }
+    
     bool CommandProcessor::process(const Command &command, Args args)
     {
         if (command == "")
