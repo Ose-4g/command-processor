@@ -40,7 +40,9 @@ namespace ose4g
          * @param processor function to process the command
          * @param description description of command.
          *
-         * @returns boolean telling if add was successful or not.
+         * command should be a string that meets the following requirements
+         * - command starts with an alphabet
+         * - command has only alphanumeric characters or -
          */
         void add(const Command &command, std::function<void(Args)> processor, const std::string &description = "");
 
