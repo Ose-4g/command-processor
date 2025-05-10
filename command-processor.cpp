@@ -137,7 +137,7 @@ namespace ose4g
             isRunning = false;
             return true;
         }
-        if (command == "clear" || command == "cls")
+        if (command == "clear")
         {
             clearScreen();
             return true;
