@@ -1,0 +1,13 @@
+name: Unit test CI
+run-name: ${{ github.actor }} is testing c++ code 🚀
+on: [ "pull_request"]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: build && run test
+      run: ./run.sh t

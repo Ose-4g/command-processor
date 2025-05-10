@@ -1,8 +1,8 @@
 #ifndef COMMAND_PROCESSOR_H
 #define COMMAND_PROCESSOR_H
 
-
 #include <unordered_map>
+#include <map>
 #include <functional>
 #include <string>
 
@@ -15,16 +15,15 @@ namespace ose4g
     {
     private:
         std::unordered_map<Command, std::function<void(Args)>> d_commandProcessorMap;
-        std::unordered_map<Command, std::string> d_commandDescriptionMap;
+        std::map<Command, std::string> d_commandDescriptionMap;
         std::string d_name;
-        bool isRunning  = true;
+        bool isRunning = true;
         void clearScreen();
-
 
     public:
         /**
          * @brief Constructor
-         * 
+         *
          * @param name name of the command processor
          */
         CommandProcessor(const std::string &name);
@@ -40,10 +39,12 @@ namespace ose4g
          * @param command Command string.
          * @param processor function to process the command
          * @param description description of command.
-         * 
-         * @returns boolean telling if add was successful or not.
+         *
+         * command should be a string that meets the following requirements
+         * - command starts with an alphabet
+         * - command has only alphanumeric characters or -
          */
-        bool add(const Command &command, std::function<void(Args)> processor, const std::string &description = "");
+        void add(const Command &command, std::function<void(Args)> processor, const std::string &description = "");
 
         /**
          * @brief starts the command processor process
@@ -66,7 +67,7 @@ namespace ose4g
          *
          * @param command the command
          * @param args the arguments to be processed with the command
-         * 
+         *
          * @returns boolean telling if process was successful or not.
          */
         bool process(const Command &command, Args args);
