@@ -12,7 +12,7 @@ INSTANTIATE_TEST_SUITE_P(TestSuite,
 TEST_P(AddCommandFailTest, addShouldFailIfCommandIsInvalid)
 {
     ose4g::CommandProcessor cp("name");
-    EXPECT_THROW(cp.add(GetParam(), [](ose4g::Args) {}, "my description"), std::invalid_argument);
+    EXPECT_THROW(cp.add(GetParam(), [](const ose4g::Args &) {}, "my description"), std::invalid_argument);
 }
 
 class AddCommandPassTest : public testing::TestWithParam<ose4g::Command>
@@ -24,14 +24,14 @@ INSTANTIATE_TEST_SUITE_P(TestSuite,
 TEST_P(AddCommandPassTest, addShouldAddCommandSuccessfully)
 {
     ose4g::CommandProcessor cp("name");
-    EXPECT_NO_THROW(cp.add(GetParam(), [](ose4g::Args) {}, "my description"));
+    EXPECT_NO_THROW(cp.add(GetParam(), [](const ose4g::Args &) {}, "my description"));
 }
 
 class ProcessCommandTest : public testing::Test
 {
 public:
     bool called = false;
-    void doStuff(ose4g::Args args)
+    void doStuff(const ose4g::Args &args)
     {
         called = true;
     }
@@ -41,14 +41,23 @@ TEST_F(ProcessCommandTest, processShouldCallAddedFunction)
     ose4g::CommandProcessor cp("name");
     auto f = std::bind(&ProcessCommandTest::doStuff, this, std::placeholders::_1);
     EXPECT_NO_THROW(cp.add("mycommand", f, ""));
-    EXPECT_TRUE(cp.process("mycommand", {}));
+    EXPECT_NO_THROW(cp.process("mycommand", {}));
     EXPECT_TRUE(called);
 }
 
 TEST(CommandProcessorTest, processShouldFailIfFunctionNotAdded)
 {
     ose4g::CommandProcessor cp("name");
-    EXPECT_FALSE(cp.process("mycommand", {}));
+    EXPECT_THROW(cp.process("mycommand", {}), std::invalid_argument);
+}
+
+TEST_F(ProcessCommandTest, processShouldFailIfFunctionValidationFails)
+{
+    ose4g::CommandProcessor cp("name");
+    auto f = std::bind(&ProcessCommandTest::doStuff, this, std::placeholders::_1);
+    ose4g::ArgCountRule<1, 5> rule1;
+    EXPECT_NO_THROW(cp.add("mycommand", f, {&rule1}, ""));
+    EXPECT_THROW(cp.process("mycommand", {}), std::invalid_argument);
 }
 
 struct ParseTestInfo
@@ -145,7 +154,7 @@ TEST_F(TestCout, ShouldPrintsOnlyHelpByDefault)
     ose4g::CommandProcessor cp("name");
     std::string helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";
     helpMessage += "\t\033[1;34mclear\033[0m: clear screen\n";
-    helpMessage+= "\t\033[1;34mexit\033[0m: exit program\n";
+    helpMessage += "\t\033[1;34mexit\033[0m: exit program\n";
     cp.help();
     EXPECT_EQ(buffer.str(), helpMessage);
 }
@@ -153,8 +162,8 @@ TEST_F(TestCout, ShouldPrintsOnlyHelpByDefault)
 TEST_F(TestCout, ShouldPrintDescriptionFromAllOtherCommands)
 {
     ose4g::CommandProcessor cp("name");
-    EXPECT_NO_THROW(cp.add("send", [](ose4g::Args args) {}, "Usage send name args. Sends arg info"));
-    EXPECT_NO_THROW(cp.add("list", [](ose4g::Args args) {}, "lists all active processes"));
+    EXPECT_NO_THROW(cp.add("send", [](const ose4g::Args &args) {}, "Usage send name args. Sends arg info"));
+    EXPECT_NO_THROW(cp.add("list", [](const ose4g::Args &args) {}, "lists all active processes"));
     std::string helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";
     helpMessage += "\t\033[1;34mclear\033[0m: clear screen\n";
     helpMessage += "\t\033[1;34mexit\033[0m: exit program\n";
@@ -163,3 +172,39 @@ TEST_F(TestCout, ShouldPrintDescriptionFromAllOtherCommands)
     cp.help();
     EXPECT_EQ(buffer.str(), helpMessage);
 }
+
+TEST(ValidateTest, argCountRuleShouldFailWithLessThanRequiredArguments)
+{
+    ose4g::ArgCountRule<3> rule;
+    ose4g::Args args = {"arg1"};
+    auto res = rule.apply(args);
+    EXPECT_FALSE(res.first);
+    EXPECT_EQ(res.second, "Number of arguments should be between 3 and 10 But got 1");
+}
+
+TEST(ValidateTest, argCountRuleShouldFailWithMoreThanRequiredArguments)
+{
+    ose4g::ArgCountRule<1, 3> rule;
+    ose4g::Args args = {"arg1", "arg2", "arg3", "arg4"};
+    auto res = rule.apply(args);
+    EXPECT_FALSE(res.first);
+    EXPECT_EQ(res.second, "Number of arguments should be between 1 and 3 But got 4");
+}
+
+TEST(ValidateTest, argCountRuleShouldPassWithRequiredArguments)
+{
+    ose4g::ArgCountRule<1, 5> rule;
+    ose4g::Args args = {"arg1", "arg2", "arg3"};
+    auto res = rule.apply(args);
+    EXPECT_TRUE(res.first);
+}
+
+// TEST(ValidateTest, testUserRule)
+// {
+//     ose4g::UserRule rule([](const ose4g::Args &args){
+//         return std::pair<bool, std::string>{true, "tested arguments"};
+//     });
+//     ose4g::Args args= {"arg1"};
+//     EXPECT_TRUE(rule.apply(args).first);
+//     // EXPECT_EQ(rule.apply(args).second,"not counting");
+// }

@@ -20,7 +20,7 @@ namespace ose4g
         }
         std::cout << helpMessage << std::endl;
     }
-    void CommandProcessor::add(const Command &command, std::function<void(Args)> processor, const std::string &description)
+    void CommandProcessor::add(const Command &command, std::function<void(const Args &)> processor, const std::string &description)
     {
         // starts with alphabet.
         // has alphanumeric characters or -
@@ -31,6 +31,12 @@ namespace ose4g
         }
         d_commandProcessorMap[command] = processor;
         d_commandDescriptionMap[command] = description;
+    }
+
+    void CommandProcessor::add(const Command &command, std::function<void(const Args &)> processor, const std::vector<Rule *> &validateRules, const std::string &description)
+    {
+        add(command, processor, description);
+        d_commandRuleMap[command] = validateRules;
     }
 
     void CommandProcessor::run()
@@ -51,11 +57,11 @@ namespace ose4g
             }
             try
             {
-                if (!process(command, args))
-                {
-                    std::cout << addColor("Command not found", Color::RED) << std::endl;
-                    continue;
-                }
+                process(command, args);
+            }
+            catch (const std::invalid_argument &exc)
+            {
+                std::cout << addColor(exc.what(), Color::RED) << std::endl;
             }
             catch (const std::exception &exc)
             {
@@ -120,38 +126,63 @@ namespace ose4g
         args = std::vector(seen.begin() + 1, seen.end());
         return true;
     }
-    
-    bool CommandProcessor::process(const Command &command, Args args)
+
+    void CommandProcessor::process(const Command &command, Args args)
     {
         if (command == "")
         {
-            return true;
+            return;
         }
         if (command == "help")
         {
             help();
-            return true;
+            return;
         }
         if (command == "exit")
         {
             isRunning = false;
-            return true;
+            return;
         }
         if (command == "clear")
         {
             clearScreen();
-            return true;
+            return;
+        }
+        auto res = validateArgs(command, args);
+        if (!res.first)
+        {
+            throw std::invalid_argument(res.second);
         }
         if (d_commandProcessorMap.find(command) == d_commandProcessorMap.end())
         {
-            return false;
+            throw std::invalid_argument("Command not found");
         }
         d_commandProcessorMap[command](args);
-        return true;
     }
 
     void CommandProcessor::clearScreen()
     {
         std::cout << "\033[2J\033[H";
+    }
+
+    std::pair<bool, std::string> CommandProcessor::validateArgs(const Command &command, Args &args)
+    {
+        if (!d_commandRuleMap.count(command))
+        {
+            return {true, ""};
+        }
+
+        std::string message = "";
+        for (auto rule : d_commandRuleMap[command])
+        {
+            auto res = rule->apply(args);
+            message += res.second;
+            if (!res.first)
+            {
+                return {false, message};
+            }
+        }
+
+        return {true, message};
     }
 }
