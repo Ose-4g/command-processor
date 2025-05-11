@@ -199,12 +199,25 @@ TEST(ValidateTest, argCountRuleShouldPassWithRequiredArguments)
     EXPECT_TRUE(res.first);
 }
 
-// TEST(ValidateTest, testUserRule)
-// {
-//     ose4g::UserRule rule([](const ose4g::Args &args){
-//         return std::pair<bool, std::string>{true, "tested arguments"};
-//     });
-//     ose4g::Args args= {"arg1"};
-//     EXPECT_TRUE(rule.apply(args).first);
-//     // EXPECT_EQ(rule.apply(args).second,"not counting");
-// }
+TEST(ValidateTest, testUserRuleFailure)
+{
+    ose4g::UserRule rule([](const ose4g::Args &args){
+        bool valid = args[0]=="3";
+        return std::pair<bool, std::string>{valid, valid ? "" : "invalid arguments"};
+    });
+    ose4g::Args args= {"arg1"};
+    auto res  = rule.apply(args);
+    EXPECT_FALSE(res.first);
+    EXPECT_EQ(res.second,"invalid arguments");
+}
+
+TEST(ValidateTest, testUserRuleSuccess)
+{
+    ose4g::UserRule rule([](const ose4g::Args &args){
+        bool valid = args[0]=="3";
+        return std::pair<bool, std::string>{valid, valid ? "" : "invalid arguments"};
+    });
+    ose4g::Args args= {"3"};
+    auto res  = rule.apply(args);
+    EXPECT_TRUE(res.first);
+}
