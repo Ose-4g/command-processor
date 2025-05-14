@@ -11,7 +11,7 @@ INSTANTIATE_TEST_SUITE_P(TestSuite,
 
 TEST_P(AddCommandFailTest, addShouldFailIfCommandIsInvalid)
 {
-    ose4g::CommandProcessor cp("name");
+    ose4g::CommandProcessorImpl cp("name");
     EXPECT_THROW(cp.add(GetParam(), [](const ose4g::Args &) {}, "my description"), std::invalid_argument);
 }
 
@@ -23,7 +23,7 @@ INSTANTIATE_TEST_SUITE_P(TestSuite,
                          testing::Values("send-command", "sendcommand"));
 TEST_P(AddCommandPassTest, addShouldAddCommandSuccessfully)
 {
-    ose4g::CommandProcessor cp("name");
+    ose4g::CommandProcessorImpl cp("name");
     EXPECT_NO_THROW(cp.add(GetParam(), [](const ose4g::Args &) {}, "my description"));
 }
 
@@ -38,7 +38,7 @@ public:
 };
 TEST_F(ProcessCommandTest, processShouldCallAddedFunction)
 {
-    ose4g::CommandProcessor cp("name");
+    ose4g::CommandProcessorImpl cp("name");
     auto f = std::bind(&ProcessCommandTest::doStuff, this, std::placeholders::_1);
     EXPECT_NO_THROW(cp.add("mycommand", f, ""));
     EXPECT_NO_THROW(cp.process("mycommand", {}));
@@ -47,13 +47,13 @@ TEST_F(ProcessCommandTest, processShouldCallAddedFunction)
 
 TEST(CommandProcessorTest, processShouldFailIfFunctionNotAdded)
 {
-    ose4g::CommandProcessor cp("name");
+    ose4g::CommandProcessorImpl cp("name");
     EXPECT_THROW(cp.process("mycommand", {}), std::invalid_argument);
 }
 
 TEST_F(ProcessCommandTest, processShouldFailIfFunctionValidationFails)
 {
-    ose4g::CommandProcessor cp("name");
+    ose4g::CommandProcessorImpl cp("name");
     auto f = std::bind(&ProcessCommandTest::doStuff, this, std::placeholders::_1);
     ose4g::ArgCountRule<1, 5> rule1;
     EXPECT_NO_THROW(cp.add("mycommand", f, {&rule1}, ""));
@@ -77,7 +77,7 @@ class ParseStatementFailTest : public testing::TestWithParam<ParseTestInfo>
 
 TEST_P(ParseStatementPassTest, parseStatementShouldPassForValidStatment)
 {
-    ose4g::CommandProcessor cp("name");
+    ose4g::CommandProcessorImpl cp("name");
     ParseTestInfo value = GetParam();
     ose4g::Command command;
     ose4g::Args args;
@@ -88,7 +88,7 @@ TEST_P(ParseStatementPassTest, parseStatementShouldPassForValidStatment)
 
 TEST_P(ParseStatementFailTest, parseStatementShouldFailForInvalidStatements)
 {
-    ose4g::CommandProcessor cp("name");
+    ose4g::CommandProcessorImpl cp("name");
     ParseTestInfo value = GetParam();
     ose4g::Command command;
     ose4g::Args args;
@@ -151,7 +151,7 @@ public:
 
 TEST_F(TestCout, ShouldPrintsOnlyHelpByDefault)
 {
-    ose4g::CommandProcessor cp("name");
+    ose4g::CommandProcessorImpl cp("name");
     std::string helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";
     helpMessage += "\t\033[1;34mclear\033[0m: clear screen\n";
     helpMessage += "\t\033[1;34mexit\033[0m: exit program\n";
@@ -161,7 +161,7 @@ TEST_F(TestCout, ShouldPrintsOnlyHelpByDefault)
 
 TEST_F(TestCout, ShouldPrintDescriptionFromAllOtherCommands)
 {
-    ose4g::CommandProcessor cp("name");
+    ose4g::CommandProcessorImpl cp("name");
     EXPECT_NO_THROW(cp.add("send", [](const ose4g::Args &args) {}, "Usage send name args. Sends arg info"));
     EXPECT_NO_THROW(cp.add("list", [](const ose4g::Args &args) {}, "lists all active processes"));
     std::string helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";

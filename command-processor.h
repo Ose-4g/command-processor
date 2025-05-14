@@ -45,7 +45,7 @@ namespace ose4g
         }
     };
 
-    class CommandProcessor
+    class CommandProcessorImpl
     {
     private:
         std::unordered_map<Command, std::function<void(const Args &)>> d_commandProcessorMap;
@@ -62,7 +62,7 @@ namespace ose4g
          *
          * @param name name of the command processor
          */
-        CommandProcessor(const std::string &name);
+        CommandProcessorImpl(const std::string &name);
 
         /**
          * @brief prints to the log details about each command.
@@ -119,6 +119,22 @@ namespace ose4g
          * @param args the arguments to be processed with the command
          */
         void process(const Command &command, Args args);
+    };
+
+    class CommandProcessor : public CommandProcessorImpl{
+        private:
+            using CommandProcessorImpl::help;
+            using CommandProcessorImpl::parseStatement;
+            using CommandProcessorImpl::process;
+
+
+        public:
+            /**
+             * @brief Constructor
+             *
+             * @param name name of the command processor
+             */
+            CommandProcessor(const std::string &name):CommandProcessorImpl(name){}
     };
 }
 

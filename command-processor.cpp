@@ -7,9 +7,9 @@
 
 namespace ose4g
 {
-    CommandProcessor::CommandProcessor(const std::string &name) : d_name(name) {}
+    CommandProcessorImpl::CommandProcessorImpl(const std::string &name) : d_name(name) {}
 
-    void CommandProcessor::help()
+    void CommandProcessorImpl::help()
     {
         std::string helpMessage = "\t" + addColor("help", Color::BLUE) + ": lists all commands and their description";
         helpMessage += "\n\t" + addColor("clear", Color::BLUE) + ": clear screen";
@@ -20,7 +20,7 @@ namespace ose4g
         }
         std::cout << helpMessage << std::endl;
     }
-    void CommandProcessor::add(const Command &command, std::function<void(const Args &)> processor, const std::string &description)
+    void CommandProcessorImpl::add(const Command &command, std::function<void(const Args &)> processor, const std::string &description)
     {
         // starts with alphabet.
         // has alphanumeric characters or -
@@ -33,13 +33,13 @@ namespace ose4g
         d_commandDescriptionMap[command] = description;
     }
 
-    void CommandProcessor::add(const Command &command, std::function<void(const Args &)> processor, const std::vector<Rule *> &validateRules, const std::string &description)
+    void CommandProcessorImpl::add(const Command &command, std::function<void(const Args &)> processor, const std::vector<Rule *> &validateRules, const std::string &description)
     {
         add(command, processor, description);
         d_commandRuleMap[command] = validateRules;
     }
 
-    void CommandProcessor::run()
+    void CommandProcessorImpl::run()
     {
         clearScreen();
         std::string input;
@@ -74,7 +74,7 @@ namespace ose4g
         }
     }
 
-    bool CommandProcessor::parseStatement(const std::string &input, Command &command, Args &args)
+    bool CommandProcessorImpl::parseStatement(const std::string &input, Command &command, Args &args)
     {
         if (input == "")
         {
@@ -127,7 +127,7 @@ namespace ose4g
         return true;
     }
 
-    void CommandProcessor::process(const Command &command, Args args)
+    void CommandProcessorImpl::process(const Command &command, Args args)
     {
         if (command == "")
         {
@@ -160,12 +160,12 @@ namespace ose4g
         d_commandProcessorMap[command](args);
     }
 
-    void CommandProcessor::clearScreen()
+    void CommandProcessorImpl::clearScreen()
     {
         std::cout << "\033[2J\033[H";
     }
 
-    std::pair<bool, std::string> CommandProcessor::validateArgs(const Command &command, Args &args)
+    std::pair<bool, std::string> CommandProcessorImpl::validateArgs(const Command &command, Args &args)
     {
         if (!d_commandRuleMap.count(command))
         {
