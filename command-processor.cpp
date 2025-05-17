@@ -155,7 +155,7 @@ namespace ose4g
         }
         if (command == "hist")
         {
-            std::cout<<d_history.getAllHistory()<<std::endl;
+            std::cout << d_history.getAllHistory() << std::endl;
             return;
         }
         auto res = validateArgs(command, args);

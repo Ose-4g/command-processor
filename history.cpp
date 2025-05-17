@@ -53,7 +53,7 @@ namespace ose4g
     {
         std::string s = "";
 
-        for(auto it = d_historyDB.begin(); it!=d_historyDB.end(); it++)
+        for (auto it = d_historyDB.begin(); it != d_historyDB.end(); it++)
         {
             s += (*it + "\n");
         }
