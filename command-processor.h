@@ -5,6 +5,7 @@
 #include <map>
 #include <functional>
 #include <string>
+#include "history.h"
 namespace ose4g
 {
     using Args = std::vector<std::string>;
@@ -53,6 +54,9 @@ namespace ose4g
         std::unordered_map<Command, std::vector<Rule *>> d_commandRuleMap;
         std::string d_name;
         bool isRunning = true;
+        History d_history;
+
+        // private methods
         void clearScreen();
         std::pair<bool, std::string> validateArgs(const Command &command, Args &args);
         std::string getUserInput();

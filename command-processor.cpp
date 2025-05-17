@@ -48,6 +48,7 @@ namespace ose4g
         while (isRunning)
         {
             input = getUserInput();
+            d_history.addBack(input);
             Command command;
             Args args;
             if (!parseStatement(input, command, args))
@@ -158,7 +159,7 @@ namespace ose4g
         }
         if (d_commandProcessorMap.find(command) == d_commandProcessorMap.end())
         {
-            throw std::invalid_argument("Command not found");
+            throw std::invalid_argument("Command " + command + " not found");
         }
         d_commandProcessorMap[command](args);
     }
@@ -194,29 +195,75 @@ namespace ose4g
         std::string currentInput = "";
         int pos = 0;
         std::string prompt = addColor(d_name + " => ", Color::GREEN);
-        int length = 0;
+        History temp;
+        temp.addFront(currentInput);
 
         while(true)
         {   
             std::cout<<("\r\033[K"+prompt +  currentInput)<<std::flush;
+            int stepsBack  = currentInput.length()-pos;
+            for(int i = 0; i < stepsBack; i++)
+            {
+                std::cout<<"\033[D"<<std::flush;
+            }
 
-            // std::cout<<"\r"<<std::string(pos + prompt.size(),'\033[C')<<std::flush;
             auto input = KeyboardInput::getInstance().getInput();
 
             if(input.first == KeyboardInput::InputType::ASCII)
             {
-                currentInput += input.second;
+                currentInput = (currentInput.substr(0,pos)+input.second + currentInput.substr(pos));
+                temp.edit(currentInput);
+                pos++;
             }
             else if(input.first == KeyboardInput::InputType::BACKSPACE && currentInput.length() > 0)
             {
-                currentInput.pop_back();
+                currentInput = currentInput.substr(0,pos-1) + currentInput.substr(pos);
+                temp.edit(currentInput);
+                pos--;
             }
             else if(input.first == KeyboardInput::InputType::ENTER)
             {
                 std::cout<<"\n";
+                pos = 0;
                 if(currentInput!="") break;
+            }
+            else if (input.first == KeyboardInput::InputType::ARROW_LEFT && pos > 0){
+                pos--;
+            }
+            else if (input.first == KeyboardInput::InputType::ARROW_RIGHT && pos < currentInput.length()){
+                pos++;
+            }
+            else if (input.first == KeyboardInput::InputType::ARROW_UP){
+                auto v = temp.getPrevious();
+
+                if(v.first)
+                {
+                    currentInput = v.second;
+                    pos = currentInput.length();
+                }
+                else{
+                    auto d = d_history.getPrevious();
+                    if(d.first)
+                    {
+                        currentInput = d.second;
+                        pos = currentInput.length();
+                        temp.addFront(currentInput);
+                    }
+                }
+            }
+            else if (input.first == KeyboardInput::InputType::ARROW_DOWN){
+                auto v = temp.getNext();
+
+                if(v.first)
+                {
+                    currentInput = v.second;
+                    pos = currentInput.length();
+                }
             }
         }
         return currentInput;
     }
 }
+
+
+//
