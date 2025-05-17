@@ -60,6 +60,7 @@ namespace ose4g
         void clearScreen();
         std::pair<bool, std::string> validateArgs(const Command &command, Args &args);
         std::string getUserInput();
+
     public:
         /**
          * @brief Constructor
@@ -125,20 +126,20 @@ namespace ose4g
         void process(const Command &command, Args args);
     };
 
-    class CommandProcessor : public CommandProcessorImpl{
-        private:
-            using CommandProcessorImpl::help;
-            using CommandProcessorImpl::parseStatement;
-            using CommandProcessorImpl::process;
+    class CommandProcessor : public CommandProcessorImpl
+    {
+    private:
+        using CommandProcessorImpl::help;
+        using CommandProcessorImpl::parseStatement;
+        using CommandProcessorImpl::process;
 
-
-        public:
-            /**
-             * @brief Constructor
-             *
-             * @param name name of the command processor
-             */
-            CommandProcessor(const std::string &name):CommandProcessorImpl(name){}
+    public:
+        /**
+         * @brief Constructor
+         *
+         * @param name name of the command processor
+         */
+        CommandProcessor(const std::string &name) : CommandProcessorImpl(name) {}
     };
 }
 

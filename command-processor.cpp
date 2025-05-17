@@ -59,7 +59,7 @@ namespace ose4g
             try
             {
                 process(command, args);
-                std::cout<<std::endl;
+                std::cout << std::endl;
             }
             catch (const std::invalid_argument &exc)
             {
@@ -198,52 +198,57 @@ namespace ose4g
         History temp;
         temp.addFront(currentInput);
 
-        while(true)
-        {   
-            std::cout<<("\r\033[K"+prompt +  currentInput)<<std::flush;
-            int stepsBack  = currentInput.length()-pos;
-            for(int i = 0; i < stepsBack; i++)
+        while (true)
+        {
+            std::cout << ("\r\033[K" + prompt + currentInput) << std::flush;
+            int stepsBack = currentInput.length() - pos;
+            for (int i = 0; i < stepsBack; i++)
             {
-                std::cout<<"\033[D"<<std::flush;
+                std::cout << "\033[D" << std::flush;
             }
 
             auto input = KeyboardInput::getInstance().getInput();
 
-            if(input.first == KeyboardInput::InputType::ASCII)
+            if (input.first == KeyboardInput::InputType::ASCII)
             {
-                currentInput = (currentInput.substr(0,pos)+input.second + currentInput.substr(pos));
+                currentInput = (currentInput.substr(0, pos) + input.second + currentInput.substr(pos));
                 temp.edit(currentInput);
                 pos++;
             }
-            else if(input.first == KeyboardInput::InputType::BACKSPACE && currentInput.length() > 0)
+            else if (input.first == KeyboardInput::InputType::BACKSPACE && currentInput.length() > 0)
             {
-                currentInput = currentInput.substr(0,pos-1) + currentInput.substr(pos);
+                currentInput = currentInput.substr(0, pos - 1) + currentInput.substr(pos);
                 temp.edit(currentInput);
                 pos--;
             }
-            else if(input.first == KeyboardInput::InputType::ENTER)
+            else if (input.first == KeyboardInput::InputType::ENTER)
             {
-                std::cout<<"\n";
+                std::cout << "\n";
                 pos = 0;
-                if(currentInput!="") break;
+                if (currentInput != "")
+                    break;
             }
-            else if (input.first == KeyboardInput::InputType::ARROW_LEFT && pos > 0){
+            else if (input.first == KeyboardInput::InputType::ARROW_LEFT && pos > 0)
+            {
                 pos--;
             }
-            else if (input.first == KeyboardInput::InputType::ARROW_RIGHT && pos < currentInput.length()){
+            else if (input.first == KeyboardInput::InputType::ARROW_RIGHT && pos < currentInput.length())
+            {
                 pos++;
             }
-            else if (input.first == KeyboardInput::InputType::ARROW_UP){
+            else if (input.first == KeyboardInput::InputType::ARROW_UP)
+            {
                 auto v = temp.getPrevious();
 
-                if(v.first)
+                if (v.first)
                 {
                     currentInput = v.second;
                     pos = currentInput.length();
                 }
-                else{
+                else
+                {
                     auto d = d_history.getPrevious();
-                    if(d.first)
+                    if (d.first)
                     {
                         currentInput = d.second;
                         pos = currentInput.length();
@@ -251,10 +256,11 @@ namespace ose4g
                     }
                 }
             }
-            else if (input.first == KeyboardInput::InputType::ARROW_DOWN){
+            else if (input.first == KeyboardInput::InputType::ARROW_DOWN)
+            {
                 auto v = temp.getNext();
 
-                if(v.first)
+                if (v.first)
                 {
                     currentInput = v.second;
                     pos = currentInput.length();
@@ -264,6 +270,5 @@ namespace ose4g
         return currentInput;
     }
 }
-
 
 //
