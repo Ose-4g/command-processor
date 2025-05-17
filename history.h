@@ -18,6 +18,7 @@ namespace ose4g
         void addBack(const std::string &record);
         void addFront(const std::string &record);
         void edit(const std::string &s);
+        std::string getAllHistory();
     };
 }
 

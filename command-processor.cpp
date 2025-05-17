@@ -15,6 +15,7 @@ namespace ose4g
         std::string helpMessage = "\t" + addColor("help", Color::BLUE) + ": lists all commands and their description";
         helpMessage += "\n\t" + addColor("clear", Color::BLUE) + ": clear screen";
         helpMessage += "\n\t" + addColor("exit", Color::BLUE) + ": exit program";
+        helpMessage += "\n\t" + addColor("hist", Color::BLUE) + ": print history";
         for (auto &command : d_commandDescriptionMap)
         {
             helpMessage += ("\n\t" + addColor(command.first, Color::BLUE) + ": " + command.second);
@@ -150,6 +151,11 @@ namespace ose4g
         if (command == "clear")
         {
             clearScreen();
+            return;
+        }
+        if (command == "hist")
+        {
+            std::cout<<d_history.getAllHistory()<<std::endl;
             return;
         }
         auto res = validateArgs(command, args);
