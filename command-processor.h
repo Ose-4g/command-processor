@@ -55,7 +55,7 @@ namespace ose4g
         bool isRunning = true;
         void clearScreen();
         std::pair<bool, std::string> validateArgs(const Command &command, Args &args);
-
+        std::string getUserInput();
     public:
         /**
          * @brief Constructor

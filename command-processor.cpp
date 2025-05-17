@@ -4,6 +4,7 @@
 #include <format>
 #include <regex>
 #include <exception>
+#include "keyboardinput.h"
 
 namespace ose4g
 {
@@ -41,13 +42,12 @@ namespace ose4g
 
     void CommandProcessorImpl::run()
     {
+        KeyboardInput::getInstance().enableKeyboard();
         clearScreen();
         std::string input;
         while (isRunning)
         {
-            std::cout << "\n"
-                      << addColor(d_name + "=> ", Color::GREEN);
-            std::getline(std::cin, input);
+            input = getUserInput();
             Command command;
             Args args;
             if (!parseStatement(input, command, args))
@@ -58,6 +58,7 @@ namespace ose4g
             try
             {
                 process(command, args);
+                std::cout<<std::endl;
             }
             catch (const std::invalid_argument &exc)
             {
@@ -71,6 +72,8 @@ namespace ose4g
             {
                 std::cout << addColor("An unknown error occured", Color::RED) << std::endl;
             }
+
+            KeyboardInput::getInstance().disableKeyboard();
         }
     }
 
@@ -184,5 +187,36 @@ namespace ose4g
         }
 
         return {true, message};
+    }
+
+    std::string CommandProcessorImpl::getUserInput()
+    {
+        std::string currentInput = "";
+        int pos = 0;
+        std::string prompt = addColor(d_name + " => ", Color::GREEN);
+        int length = 0;
+
+        while(true)
+        {   
+            std::cout<<("\r\033[K"+prompt +  currentInput)<<std::flush;
+
+            // std::cout<<"\r"<<std::string(pos + prompt.size(),'\033[C')<<std::flush;
+            auto input = KeyboardInput::getInstance().getInput();
+
+            if(input.first == KeyboardInput::InputType::ASCII)
+            {
+                currentInput += input.second;
+            }
+            else if(input.first == KeyboardInput::InputType::BACKSPACE && currentInput.length() > 0)
+            {
+                currentInput.pop_back();
+            }
+            else if(input.first == KeyboardInput::InputType::ENTER)
+            {
+                std::cout<<"\n";
+                if(currentInput!="") break;
+            }
+        }
+        return currentInput;
     }
 }
