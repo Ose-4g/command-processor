@@ -15,7 +15,7 @@ namespace ose4g
         std::string helpMessage = "\t" + addColor("help", Color::BLUE) + ": lists all commands and their description";
         helpMessage += "\n\t" + addColor("clear", Color::BLUE) + ": clear screen";
         helpMessage += "\n\t" + addColor("exit", Color::BLUE) + ": exit program";
-        helpMessage += "\n\t" + addColor("hist", Color::BLUE) + ": print history";
+        helpMessage += "\n\t" + addColor("history", Color::BLUE) + ": print history";
         for (auto &command : d_commandDescriptionMap)
         {
             helpMessage += ("\n\t" + addColor(command.first, Color::BLUE) + ": " + command.second);
@@ -75,8 +75,8 @@ namespace ose4g
                 std::cout << addColor("An unknown error occured", Color::RED) << std::endl;
             }
 
-            KeyboardInput::getInstance().disableKeyboard();
         }
+        KeyboardInput::getInstance().disableKeyboard();
     }
 
     bool CommandProcessorImpl::parseStatement(const std::string &input, Command &command, Args &args)
@@ -153,9 +153,9 @@ namespace ose4g
             clearScreen();
             return;
         }
-        if (command == "hist")
+        if (command == "history")
         {
-            std::cout << d_history.getAllHistory() << std::endl;
+            std::cout << d_history.getAllHistory();
             return;
         }
         auto res = validateArgs(command, args);
@@ -207,6 +207,8 @@ namespace ose4g
         while (true)
         {
             std::cout << ("\r\033[K" + prompt + currentInput) << std::flush;
+            
+            // move the cursor
             int stepsBack = currentInput.length() - pos;
             for (int i = 0; i < stepsBack; i++)
             {
@@ -214,19 +216,22 @@ namespace ose4g
             }
 
             auto input = KeyboardInput::getInstance().getInput();
-
+            
+            // add ascii character to current string
             if (input.first == KeyboardInput::InputType::ASCII)
             {
                 currentInput = (currentInput.substr(0, pos) + input.second + currentInput.substr(pos));
                 temp.edit(currentInput);
                 pos++;
             }
+            // remove from current string
             else if (input.first == KeyboardInput::InputType::BACKSPACE && currentInput.length() > 0)
             {
                 currentInput = currentInput.substr(0, pos - 1) + currentInput.substr(pos);
                 temp.edit(currentInput);
                 pos--;
             }
+            // return complete user input
             else if (input.first == KeyboardInput::InputType::ENTER)
             {
                 std::cout << "\n";
@@ -234,16 +239,23 @@ namespace ose4g
                 if (currentInput != "")
                     break;
             }
+            // move cursor left
             else if (input.first == KeyboardInput::InputType::ARROW_LEFT && pos > 0)
             {
                 pos--;
             }
+            // move cursor right
             else if (input.first == KeyboardInput::InputType::ARROW_RIGHT && pos < currentInput.length())
             {
                 pos++;
             }
+            // go to previous history
             else if (input.first == KeyboardInput::InputType::ARROW_UP)
             {
+                /**
+                 * check history for temporary history first
+                 * if not then check the permanent history
+                 */
                 auto v = temp.getPrevious();
 
                 if (v.first)
@@ -262,6 +274,7 @@ namespace ose4g
                     }
                 }
             }
+            // Go to newer history.
             else if (input.first == KeyboardInput::InputType::ARROW_DOWN)
             {
                 auto v = temp.getNext();

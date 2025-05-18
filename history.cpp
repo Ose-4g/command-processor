@@ -46,7 +46,11 @@ namespace ose4g
 
     void History::edit(const std::string &s)
     {
-        *d_iterator = s;
+        // so we know that the iterator is valid
+        if(d_historyDB.size() > 0)
+        {
+            *d_iterator = s;
+        }
     }
 
     std::string History::getAllHistory()
