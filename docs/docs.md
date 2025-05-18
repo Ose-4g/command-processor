@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 The add function takes a function or processing command arguments and an optional description for the command.
 
 ## Adding Validation
-A demo showing validation
+A demo showing validation   
 ![DEMO](validation.gif) 
 
 ```cpp
