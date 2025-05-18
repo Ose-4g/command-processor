@@ -45,13 +45,13 @@ TEST_F(ProcessCommandTest, processShouldCallAddedFunction)
     EXPECT_TRUE(called);
 }
 
-TEST(CommandProcessorTest, processShouldFailIfFunctionNotAdded)
+TEST(CommandProcessorTest, processShouldThrowIfFunctionNotAdded)
 {
     ose4g::CommandProcessorImpl cp("name");
     EXPECT_THROW(cp.process("mycommand", {}), std::invalid_argument);
 }
 
-TEST_F(ProcessCommandTest, processShouldFailIfFunctionValidationFails)
+TEST_F(ProcessCommandTest, processShouldThrowIfFunctionValidationFails)
 {
     ose4g::CommandProcessorImpl cp("name");
     auto f = std::bind(&ProcessCommandTest::doStuff, this, std::placeholders::_1);
@@ -155,6 +155,7 @@ TEST_F(TestCout, ShouldPrintsOnlyHelpByDefault)
     std::string helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";
     helpMessage += "\t\033[1;34mclear\033[0m: clear screen\n";
     helpMessage += "\t\033[1;34mexit\033[0m: exit program\n";
+    helpMessage += "\t\033[1;34mhistory\033[0m: print history\n";
     cp.help();
     EXPECT_EQ(buffer.str(), helpMessage);
 }
@@ -167,6 +168,7 @@ TEST_F(TestCout, ShouldPrintDescriptionFromAllOtherCommands)
     std::string helpMessage = "\t\033[1;34mhelp\033[0m: lists all commands and their description\n";
     helpMessage += "\t\033[1;34mclear\033[0m: clear screen\n";
     helpMessage += "\t\033[1;34mexit\033[0m: exit program\n";
+    helpMessage += "\t\033[1;34mhistory\033[0m: print history\n";
     helpMessage += "\t\033[1;34mlist\033[0m: lists all active processes\n";
     helpMessage += "\t\033[1;34msend\033[0m: Usage send name args. Sends arg info\n";
     cp.help();

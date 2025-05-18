@@ -6,19 +6,26 @@ namespace ose4g
     {
         if (!enabled)
         {
+            //retrieves the current terminal settings standard input
             tcgetattr(STDIN_FILENO, &original);
-            original.c_lflag &= ~(ICANON | ECHO); // Disable canonical mode and echo
-            tcsetattr(STDIN_FILENO, TCSAFLUSH, &original);
+            
+            // create copy of terminal.
+            auto raw = original;
+            // disables line buffereing for input and echoing to terminal when you input.
+            raw.c_lflag &= ~(ICANON | ECHO); 
+            tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
         }
         enabled = true;
     }
 
     void KeyboardInput::disableKeyboard()
     {
+        // resets he terminal keyboard to original settings. 
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &original);
         enabled = false;
     }
 
+    
     KeyboardInput &KeyboardInput::getInstance()
     {
         static KeyboardInput instance; // Thread-safe in C++11+

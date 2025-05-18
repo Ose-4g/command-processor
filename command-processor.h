@@ -11,12 +11,20 @@ namespace ose4g
     using Args = std::vector<std::string>;
     using Command = std::string;
 
+    /**
+     * Rule class for validation of arguments
+     */
     class Rule
     {
     public:
+        /// apply validation rule on arguments
         virtual std::pair<bool, std::string> apply(ose4g::Args &args) = 0;
     };
 
+    /**
+     * @tparam MIN_ARG_COUNT minimum argument count
+     * @tparam MAX_ARG_COUNT maximum argument count
+     */
     template <int MIN_ARG_COUNT = 1, int MAX_ARG_COUNT = 10>
     class ArgCountRule : public Rule
     {
@@ -33,6 +41,7 @@ namespace ose4g
         }
     };
 
+    /// @brief User defined rule to apply args
     class UserRule : public Rule
     {
     private:
