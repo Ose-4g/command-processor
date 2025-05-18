@@ -2,7 +2,6 @@
 ![DEMO](command-processor.gif)
 
 ```cpp
-#include <gtest/gtest.h>
 #include "command-processor.h"
 #include <iostream>
 
@@ -37,7 +36,6 @@ A demo showing validation
 ![DEMO](validation.gif) 
 
 ```cpp
-#include <gtest/gtest.h>
 #include "command-processor.h"
 #include <iostream>
 
