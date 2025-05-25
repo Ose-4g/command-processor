@@ -15,6 +15,12 @@ TEST_P(AddCommandFailTest, addShouldFailIfCommandIsInvalid)
     EXPECT_THROW(cp.add(GetParam(), [](const ose4g::Args &) {}, "my description"), std::invalid_argument);
 }
 
+TEST(AddCommandTest, addCommandshouldFailIfCommandAlreadyExists){
+    ose4g::CommandProcessorImpl cp("name");
+    EXPECT_NO_THROW(cp.add("command", [](const ose4g::Args &) {}, "my description"));
+    EXPECT_THROW(cp.add("command", [](const ose4g::Args &) {}, "my description"), std::invalid_argument);
+}
+
 class AddCommandPassTest : public testing::TestWithParam<ose4g::Command>
 {
 };

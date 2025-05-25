@@ -31,6 +31,10 @@ namespace ose4g
         {
             throw std::invalid_argument("invalid argument provided for command");
         }
+        if(d_commandProcessorMap.count(command))
+        {
+            throw std::invalid_argument("command already exists");
+        }
         d_commandProcessorMap[command] = processor;
         d_commandDescriptionMap[command] = description;
     }
