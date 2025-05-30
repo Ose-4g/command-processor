@@ -47,12 +47,14 @@ namespace ose4g
 
     void CommandProcessorImpl::run()
     {
-        KeyboardInput::getInstance().enableKeyboard();
+        
         clearScreen();
         std::string input;
         while (isRunning)
         {
+            KeyboardInput::getInstance().enableKeyboard();
             input = getUserInput();
+            KeyboardInput::getInstance().disableKeyboard();
             d_history.addBack(input);
             Command command;
             Args args;
@@ -80,7 +82,6 @@ namespace ose4g
             }
 
         }
-        KeyboardInput::getInstance().disableKeyboard();
     }
 
     bool CommandProcessorImpl::parseStatement(const std::string &input, Command &command, Args &args)
