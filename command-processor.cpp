@@ -4,23 +4,25 @@
 #include <format>
 #include <regex>
 #include <exception>
+#include "keyboardinput.h"
 
 namespace ose4g
 {
-    CommandProcessor::CommandProcessor(const std::string &name) : d_name(name) {}
+    CommandProcessorImpl::CommandProcessorImpl(const std::string &name) : d_name(name) {}
 
-    void CommandProcessor::help()
+    void CommandProcessorImpl::help()
     {
         std::string helpMessage = "\t" + addColor("help", Color::BLUE) + ": lists all commands and their description";
         helpMessage += "\n\t" + addColor("clear", Color::BLUE) + ": clear screen";
         helpMessage += "\n\t" + addColor("exit", Color::BLUE) + ": exit program";
+        helpMessage += "\n\t" + addColor("history", Color::BLUE) + ": print history";
         for (auto &command : d_commandDescriptionMap)
         {
             helpMessage += ("\n\t" + addColor(command.first, Color::BLUE) + ": " + command.second);
         }
         std::cout << helpMessage << std::endl;
     }
-    void CommandProcessor::add(const Command &command, std::function<void(Args)> processor, const std::string &description)
+    void CommandProcessorImpl::add(const Command &command, std::function<void(const Args &)> processor, const std::string &description)
     {
         // starts with alphabet.
         // has alphanumeric characters or -
@@ -29,19 +31,31 @@ namespace ose4g
         {
             throw std::invalid_argument("invalid argument provided for command");
         }
+        if(d_commandProcessorMap.count(command))
+        {
+            throw std::invalid_argument("command already exists");
+        }
         d_commandProcessorMap[command] = processor;
         d_commandDescriptionMap[command] = description;
     }
 
-    void CommandProcessor::run()
+    void CommandProcessorImpl::add(const Command &command, std::function<void(const Args &)> processor, const std::vector<Rule *> &validateRules, const std::string &description)
     {
+        add(command, processor, description);
+        d_commandRuleMap[command] = validateRules;
+    }
+
+    void CommandProcessorImpl::run()
+    {
+        
         clearScreen();
         std::string input;
         while (isRunning)
         {
-            std::cout << "\n"
-                      << addColor(d_name + "=> ", Color::GREEN);
-            std::getline(std::cin, input);
+            KeyboardInput::getInstance().enableKeyboard();
+            input = getUserInput();
+            KeyboardInput::getInstance().disableKeyboard();
+            d_history.addBack(input);
             Command command;
             Args args;
             if (!parseStatement(input, command, args))
@@ -51,11 +65,12 @@ namespace ose4g
             }
             try
             {
-                if (!process(command, args))
-                {
-                    std::cout << addColor("Command not found", Color::RED) << std::endl;
-                    continue;
-                }
+                process(command, args);
+                std::cout << std::endl;
+            }
+            catch (const std::invalid_argument &exc)
+            {
+                std::cout << addColor(exc.what(), Color::RED) << std::endl;
             }
             catch (const std::exception &exc)
             {
@@ -65,10 +80,11 @@ namespace ose4g
             {
                 std::cout << addColor("An unknown error occured", Color::RED) << std::endl;
             }
+
         }
     }
 
-    bool CommandProcessor::parseStatement(const std::string &input, Command &command, Args &args)
+    bool CommandProcessorImpl::parseStatement(const std::string &input, Command &command, Args &args)
     {
         if (input == "")
         {
@@ -120,38 +136,163 @@ namespace ose4g
         args = std::vector(seen.begin() + 1, seen.end());
         return true;
     }
-    
-    bool CommandProcessor::process(const Command &command, Args args)
+
+    void CommandProcessorImpl::process(const Command &command, Args args)
     {
         if (command == "")
         {
-            return true;
+            return;
         }
         if (command == "help")
         {
             help();
-            return true;
+            return;
         }
         if (command == "exit")
         {
             isRunning = false;
-            return true;
+            return;
         }
         if (command == "clear")
         {
             clearScreen();
-            return true;
+            return;
+        }
+        if (command == "history")
+        {
+            std::cout << d_history.getAllHistory();
+            return;
+        }
+        auto res = validateArgs(command, args);
+        if (!res.first)
+        {
+            throw std::invalid_argument(res.second);
         }
         if (d_commandProcessorMap.find(command) == d_commandProcessorMap.end())
         {
-            return false;
+            throw std::invalid_argument("Command " + command + " not found");
         }
         d_commandProcessorMap[command](args);
-        return true;
     }
 
-    void CommandProcessor::clearScreen()
+    void CommandProcessorImpl::clearScreen()
     {
         std::cout << "\033[2J\033[H";
     }
+
+    std::pair<bool, std::string> CommandProcessorImpl::validateArgs(const Command &command, Args &args)
+    {
+        if (!d_commandRuleMap.count(command))
+        {
+            return {true, ""};
+        }
+
+        std::string message = "";
+        for (auto rule : d_commandRuleMap[command])
+        {
+            auto res = rule->apply(args);
+            message += res.second;
+            if (!res.first)
+            {
+                return {false, message};
+            }
+        }
+
+        return {true, message};
+    }
+
+    std::string CommandProcessorImpl::getUserInput()
+    {
+        std::string currentInput = "";
+        int pos = 0;
+        std::string prompt = addColor(d_name + " => ", Color::GREEN);
+        History temp;
+        temp.addFront(currentInput);
+
+        while (true)
+        {
+            std::cout << ("\r\033[K" + prompt + currentInput) << std::flush;
+            
+            // move the cursor
+            int stepsBack = currentInput.length() - pos;
+            for (int i = 0; i < stepsBack; i++)
+            {
+                std::cout << "\033[D" << std::flush;
+            }
+
+            auto input = KeyboardInput::getInstance().getInput();
+            
+            // add ascii character to current string
+            if (input.first == KeyboardInput::InputType::ASCII)
+            {
+                currentInput = (currentInput.substr(0, pos) + input.second + currentInput.substr(pos));
+                temp.edit(currentInput);
+                pos++;
+            }
+            // remove from current string
+            else if (input.first == KeyboardInput::InputType::BACKSPACE && currentInput.length() > 0)
+            {
+                currentInput = currentInput.substr(0, pos - 1) + currentInput.substr(pos);
+                temp.edit(currentInput);
+                pos--;
+            }
+            // return complete user input
+            else if (input.first == KeyboardInput::InputType::ENTER)
+            {
+                std::cout << "\n";
+                pos = 0;
+                if (currentInput != "")
+                    break;
+            }
+            // move cursor left
+            else if (input.first == KeyboardInput::InputType::ARROW_LEFT && pos > 0)
+            {
+                pos--;
+            }
+            // move cursor right
+            else if (input.first == KeyboardInput::InputType::ARROW_RIGHT && pos < currentInput.length())
+            {
+                pos++;
+            }
+            // go to previous history
+            else if (input.first == KeyboardInput::InputType::ARROW_UP)
+            {
+                /**
+                 * check history for temporary history first
+                 * if not then check the permanent history
+                 */
+                auto v = temp.getPrevious();
+
+                if (v.first)
+                {
+                    currentInput = v.second;
+                    pos = currentInput.length();
+                }
+                else
+                {
+                    auto d = d_history.getPrevious();
+                    if (d.first)
+                    {
+                        currentInput = d.second;
+                        pos = currentInput.length();
+                        temp.addFront(currentInput);
+                    }
+                }
+            }
+            // Go to newer history.
+            else if (input.first == KeyboardInput::InputType::ARROW_DOWN)
+            {
+                auto v = temp.getNext();
+
+                if (v.first)
+                {
+                    currentInput = v.second;
+                    pos = currentInput.length();
+                }
+            }
+        }
+        return currentInput;
+    }
 }
+
+//

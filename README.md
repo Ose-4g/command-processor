@@ -1,8 +1,8 @@
 # command-processor
+![Demo](docs/command-processor.gif)
 This is a simple CPP program that provides a Command Line Interface. 
 It is created to easily be used with other C++ applications that want to use an interactive Command Line Interface.    
 
-![image](docs/Screenshot%202025-05-09%20at%2018.31.06.png)
 
 ## NOTE
 This was built and tested with UNIX terminal. So windows default terminal (command prompt or powershell) may not work. It should work with Windows Subsystem for Linux(WSL) 
@@ -16,7 +16,7 @@ include(FetchContent)
 FetchContent_Declare(
   commandprocessor
   GIT_REPOSITORY https://github.com/Ose-4g/command-processor.git
-  GIT_TAG v1.1.1
+  GIT_TAG v1.2.1
 )
 
 FetchContent_MakeAvailable(commandprocessor)
@@ -31,7 +31,8 @@ To run the unit tests in this project. Run
 ```
 ./run.sh t
 ```
+## Documentation
+[Read docs here](docs/docs.md)
 
 ## Upcoming features
-- Command history 
 - Command autocomplete
