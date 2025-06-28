@@ -8,11 +8,14 @@
 
 namespace ose4g
 {
+    // why is it 'd_name' and not 'm_name'
     CommandProcessorImpl::CommandProcessorImpl(const std::string &name) : d_name(name) {}
 
     void CommandProcessorImpl::help()
     {
         std::string helpMessage = "\t" + addColor("help", Color::BLUE) + ": lists all commands and their description";
+        //std::ostringstream oss;
+        //oss << "\t" << addColor("help", Color::BLUE) << ": lists all commands and their description\n";
         helpMessage += "\n\t" + addColor("clear", Color::BLUE) + ": clear screen";
         helpMessage += "\n\t" + addColor("exit", Color::BLUE) + ": exit program";
         helpMessage += "\n\t" + addColor("history", Color::BLUE) + ": print history";
@@ -31,9 +34,9 @@ namespace ose4g
         {
             throw std::invalid_argument("invalid argument provided for command");
         }
-        if(d_commandProcessorMap.count(command))
+        if (auto it = d_commandProcessorMap.find(command); it != d_commandProcessorMap.end())
         {
-            throw std::invalid_argument("command already exists");
+            throw std::invalid_argument("Command already exists");
         }
         d_commandProcessorMap[command] = processor;
         d_commandDescriptionMap[command] = description;
@@ -48,7 +51,7 @@ namespace ose4g
     void CommandProcessorImpl::run()
     {
         
-        clearScreen();
+        clearScreen(true);
         std::string input;
         while (isRunning)
         {
@@ -155,7 +158,7 @@ namespace ose4g
         }
         if (command == "clear")
         {
-            clearScreen();
+            clearScreen(true);
             return;
         }
         if (command == "history")
@@ -175,14 +178,17 @@ namespace ose4g
         d_commandProcessorMap[command](args);
     }
 
-    void CommandProcessorImpl::clearScreen()
+    void CommandProcessorImpl::clearScreen(bool enable)
     {
+        //disable the clear functionality when needed, to allow flexibility.
+        if (!enable) return;
+        std::cout << "\033[2J\033[H";
         std::cout << "\033[2J\033[H";
     }
 
     std::pair<bool, std::string> CommandProcessorImpl::validateArgs(const Command &command, Args &args)
     {
-        if (!d_commandRuleMap.count(command))
+        if (auto it = d_commandRuleMap.find(command); it == d_commandRuleMap.end())
         {
             return {true, ""};
         }

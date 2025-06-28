@@ -66,7 +66,7 @@ namespace ose4g
         History d_history;
 
         // private methods
-        void clearScreen();
+        void clearScreen(bool enable);
         std::pair<bool, std::string> validateArgs(const Command &command, Args &args);
         std::string getUserInput();
 
