@@ -16,7 +16,7 @@ include(FetchContent)
 FetchContent_Declare(
   commandprocessor
   GIT_REPOSITORY https://github.com/Ose-4g/command-processor.git
-  GIT_TAG v1.2.1
+  GIT_TAG v1.3.1
 )
 
 FetchContent_MakeAvailable(commandprocessor)
