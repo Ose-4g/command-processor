@@ -72,3 +72,6 @@ int main(int argc, char **argv)
 ## History
 Use the `history` command to view recent commands like on unix terminal.
 Use the up and down arrow keys to move through history just like on unix terminal.
+
+## AutoComplete
+Use the TAB key to get autocomplete.

@@ -34,5 +34,3 @@ To run the unit tests in this project. Run
 ## Documentation
 [Read docs here](docs/docs.md)
 
-## Upcoming features
-- Command autocomplete
