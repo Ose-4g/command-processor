@@ -5,7 +5,9 @@
 #include <map>
 #include <functional>
 #include <string>
+#include <regex>
 #include "history.h"
+#include "autocomplete.h"
 namespace ose4g
 {
     using Args = std::vector<std::string>;
@@ -62,8 +64,10 @@ namespace ose4g
         std::map<Command, std::string> d_commandDescriptionMap;
         std::unordered_map<Command, std::vector<Rule *>> d_commandRuleMap;
         std::string d_name;
+        std::regex d_commandPattern;
         bool isRunning = true;
         History d_history;
+        AutoComplete d_autocomplete;
 
         // private methods
         void clearScreen();

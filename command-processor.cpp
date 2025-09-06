@@ -8,7 +8,12 @@
 
 namespace ose4g
 {
-    CommandProcessorImpl::CommandProcessorImpl(const std::string &name) : d_name(name) {}
+    CommandProcessorImpl::CommandProcessorImpl(const std::string &name) : d_name(name), d_commandPattern("^[A-Za-z][A-Za-z0-9-]*$") {
+        d_autocomplete.add("help");
+        d_autocomplete.add("exit");
+        d_autocomplete.add("clear");
+        d_autocomplete.add("history");
+    }
 
     void CommandProcessorImpl::help()
     {
@@ -22,12 +27,12 @@ namespace ose4g
         }
         std::cout << helpMessage << std::endl;
     }
+
     void CommandProcessorImpl::add(const Command &command, std::function<void(const Args &)> processor, const std::string &description)
     {
         // starts with alphabet.
         // has alphanumeric characters or -
-        std::regex commandPattern("^[A-Za-z][A-Za-z0-9-]*$");
-        if (!std::regex_match(command, commandPattern))
+        if (!std::regex_match(command, d_commandPattern) || command == "help" || command == "clear" || command == "exit" || command == "history")
         {
             throw std::invalid_argument("invalid argument provided for command");
         }
@@ -37,6 +42,7 @@ namespace ose4g
         }
         d_commandProcessorMap[command] = processor;
         d_commandDescriptionMap[command] = description;
+        d_autocomplete.add(command);
     }
 
     void CommandProcessorImpl::add(const Command &command, std::function<void(const Args &)> processor, const std::vector<Rule *> &validateRules, const std::string &description)
@@ -289,6 +295,33 @@ namespace ose4g
                     currentInput = v.second;
                     pos = currentInput.length();
                 }
+            }
+            // add autocomplete
+            else if(input.first == KeyboardInput::InputType::TAB)
+            {
+                // only return if it is just the command
+                if(!std::regex_match(currentInput, d_commandPattern))
+                {
+                    continue;
+                }
+                auto suggestions = d_autocomplete.getSuggestions(currentInput);
+                if(suggestions.size() == 0)
+                {
+                    continue;
+                }
+                if(suggestions.size() == 1)
+                {
+                    currentInput = suggestions[0];
+                    pos = currentInput.length();
+                    continue;
+                }
+                std::string newline = "\n";
+                for(auto& suggestion: suggestions)
+                {
+                    newline += (suggestion + " ");
+                }
+                std::cout<<newline<<std::endl;
+                continue;
             }
         }
         return currentInput;
